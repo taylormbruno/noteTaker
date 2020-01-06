@@ -10,6 +10,7 @@ let raw = fs.readFileSync('db/db.json');
 let notes = JSON.parse(raw);
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
 app.use(express.json());
 
 app.get("/", function (req, res) {
@@ -27,7 +28,18 @@ app.post("/api/notes", function (req, res) {
     console.log(newNote);
 });
 
-app.delete("/api/notes:id")
+notes.forEach((item, i) => {
+    item.id = i+1;
+});
+
+app.delete("/api/notes:id", function (req,res) {
+    res.send("Received DELETE request");
+    notes = notes.filter(function ( obj ) {
+        return obj.id !== 'money';
+    });
+    fs.writeFileSync("./db/db.json", notes, (err) => { if (err) throw err });
+    res.redirect("/notes");
+});
 
 app.listen(PORT, function() {
     console.log("App listening on PORT " + PORT);
