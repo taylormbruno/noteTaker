@@ -11,5 +11,9 @@
   "dependencies": {
     "express": "^4.16.4",
     "mysql": "^2.16.0"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
+
