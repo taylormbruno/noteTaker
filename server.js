@@ -47,24 +47,15 @@ app.post("/api/notes", function (req, res) {
 
 app.delete("/api/notes/:id", function (req,res) {
     res.send("Received DELETE request");
-    console.log(req.params.id);
-    let newNotes = notes.filter(function ( obj ) {
-        console.log(obj.id);
-        console.log(req.params.id);
-        if (obj.id == req.params.id) {
-            delete obj;
-        }
-        else {
-            return obj;
-        }
-    });
-    console.log(newNotes);
+    let remID = req.params.id;
+    notes.splice((remID - 1), 1);
+    console.log(notes + " after splice \n");
 
-
-    let reverse = JSON.stringify(newNotes);
+    writeId();
+    let reverse = JSON.stringify(notes);
     fs.writeFileSync("./db/db.json", reverse, (err) => { if (err) throw err });
     console.log(notes);
-    // res.redirect("/notes");
+    
 });
 
 app.listen(PORT, function() {
