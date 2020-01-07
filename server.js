@@ -9,6 +9,10 @@ const PORT = 3000;
 let raw = fs.readFileSync('db/db.json');
 let notes = JSON.parse(raw);
 
+if (notes[0].id === undefined) {
+    writeId();
+}
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 app.use(express.json());
@@ -22,25 +26,54 @@ app.get("/notes", function (req, res) {
 app.get("/api/notes", function (req, res) {
     return res.json(notes);
 });
+// app.get("/api/notes/:id", function (req, res) {
+//     res.redirect("/notes");
+// });
 
 app.post("/api/notes", function (req, res) {
     let newNote = req.body;
     console.log(newNote);
+    notes.push(newNote);
+    for (let i=0; i < notes.length; i++) {
+        delete notes[i].id;
+    }
+    console.log(notes);
+    writeId();
+    let reverse = JSON.stringify(notes);
+    fs.writeFileSync("./db/db.json", reverse, (err) => { if (err) throw err });
+    res.redirect('back');
 });
 
-notes.forEach((item, i) => {
-    item.id = i+1;
-});
 
-app.delete("/api/notes:id", function (req,res) {
+app.delete("/api/notes/:id", function (req,res) {
     res.send("Received DELETE request");
-    notes = notes.filter(function ( obj ) {
-        return obj.id !== 'money';
+    console.log(req.params.id);
+    let newNotes = notes.filter(function ( obj ) {
+        console.log(obj.id);
+        console.log(req.params.id);
+        if (obj.id == req.params.id) {
+            delete obj;
+        }
+        else {
+            return obj;
+        }
     });
-    fs.writeFileSync("./db/db.json", notes, (err) => { if (err) throw err });
-    res.redirect("/notes");
+    console.log(newNotes);
+
+
+    let reverse = JSON.stringify(newNotes);
+    fs.writeFileSync("./db/db.json", reverse, (err) => { if (err) throw err });
+    console.log(notes);
+    // res.redirect("/notes");
 });
 
 app.listen(PORT, function() {
     console.log("App listening on PORT " + PORT);
 });
+
+function writeId() {
+    notes.forEach((item, i) => {
+        item.id = i+1;
+    });
+    console.log(notes);
+}
